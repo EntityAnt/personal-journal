@@ -1,3 +1,16 @@
 from django.contrib import admin
 
-# Register your models here.
+from journal.models import DiaryEntry
+
+
+@admin.register(DiaryEntry)
+class DiaryEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "title",
+        "content",
+        "created_at",
+        "owner",
+    )
+    list_filter = ("title",)
+    search_fields = ("title", "content")
