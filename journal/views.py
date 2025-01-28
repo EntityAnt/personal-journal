@@ -1,9 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from .models import DiaryEntry
 from .paginations import CustomPagination
 from .serializers import DiaryEntrySerializer
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 class DiaryEntryViewSet(viewsets.ModelViewSet):

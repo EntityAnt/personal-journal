@@ -1,6 +1,7 @@
 from rest_framework.routers import SimpleRouter
-from .views import DiaryEntryViewSet
+
 from .apps import JournalConfig
+from .views import DiaryEntryViewSet
 
 app_name = JournalConfig.name
 
