@@ -1,0 +1,17 @@
+{% extends 'journal/base.html' %}
+{% load my_tags %}
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center mt-5">
+            {% if user.is_authenticated %}
+            <h2 class="row justify-content-center">Приветствуем Вас {{user.email}} </h2>
+            {% else %}
+            <h2 class="row justify-content-center">Добро пожаловать в Ваш "Личный дневник" </h2>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
