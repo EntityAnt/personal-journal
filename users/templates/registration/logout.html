@@ -1,0 +1,20 @@
+{% extends "journal/base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <form class="row" action="{% url 'users:logout' %}" method="post" enctype="multipart/form-data">
+                <div class="card">
+                    <h3 class="mt-5">Вы действительно хотите выйти из аккаунта "{{object.email}}"</h3>
+                    <div class="form-body">
+                        {% csrf_token %}
+                    </div>
+                    <button type="submit" class="btn btn-danger">Выйти</button>
+                    <a class="btn btn-primary mt-1" href="{% url 'journal:index' %}" role="button">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

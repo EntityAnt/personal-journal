@@ -22,20 +22,18 @@
                             <ul class="dropdown-menu">
                                 {% if user.is_authenticated %}
                                 <li>
-                                    <a class="dropdown-item" href="#">Выход</a>
+                                    <a class="dropdown-item" href="{% url 'users:logout' %}">Выход</a>
                                 </li>
-                                {% if user.is_superuser %}
-                                <li><a class="dropdown-item" href="#">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:detail' user.pk%}">Профиль</a></li>
 
+                                {% if user.is_superuser %}
                                 <li>
-                                    <a class="dropdown-item" href="#">Список пользователей</a>
+                                    <a class="dropdown-item" href="{% url 'users:users' %}">Список пользователей</a>
                                 </li>
                                 {% endif %}
                                 {% else %}
-                                <li>
-                                    <a class="dropdown-item" href="#">Вход</a>
-                                </li>
-                                <li><a class="dropdown-item" href="#">Регистрация</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:login' %}">Вход</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:register' %}">Регистрация</a></li>
 
                                 {%endif%}
 

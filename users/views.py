@@ -1,45 +1,146 @@
-from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+import secrets
 
-from journal.paginations import CustomPagination
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.views import LoginView
+from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+from django.urls import reverse_lazy
+from django.utils.crypto import get_random_string
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+
+from config.settings import EMAIL_HOST_USER
+from users.forms import (
+    PasswordRecoveryForm,
+    UserLoginForm,
+    UserRegistrationForm,
+    UserUpdateForm
+)
 from users.models import User
-from users.serializers import UserSerializer
 
 
-class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
-    pagination_class = CustomPagination
+class UserCreateView(CreateView):
+    model = User
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy("users:email_confirmation")
 
-    def get_queryset(self):
-        if self.request.user.is_staff:
-            return User.objects.all()
-        return User.objects.filter(id=self.request.user.id)
-
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def destroy(self, request, *args, **kwargs):
-        user_id = kwargs.get("pk")
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if request.user.is_staff or request.user.id == user.id:
-            return super().destroy(request, *args, **kwargs)
-
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
-
-class UserCreateAPIView(CreateAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-
-    def perform_create(self, serializer):
-        user = serializer.save(is_active=True)
-        user.set_password(serializer.validated_data["password"])
+    def form_valid(self, form):
+        user = form.save()
+        user.is_active = False
+        token = secrets.token_hex(16)
+        host = self.request.get_host()
+        url = f"http://{host}/users/email-confirm/{token}/"
+        user.token = token
         user.save()
+        send_mail(
+            subject="Подтверждение почты",
+            message=f"Здравствуйте, перейдите по ссылке для подтверждения почты: {url} ",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+        return super().form_valid(form)
+
+
+class UserLoginView(LoginView):
+    model = User
+    form_class = UserLoginForm
+
+
+
+
+
+class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = User
+    template_name = "users/user_list.html"
+
+    def test_func(self):
+        return self.request.user.groups.filter(name="Менеджеры").exists() or self.request.user.is_superuser
+
+
+class UserDetailView(LoginRequiredMixin, DetailView):
+    model = User
+    form_class = UserUpdateForm
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if self.request.user.is_authenticated:
+            return self.object
+        raise PermissionDenied
+
+
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+
+    def get_success_url(self):
+        if self.request.user.is_superuser:
+            return reverse_lazy("users:users")
+        else:
+            return reverse_lazy("journal:journal_list")
+
+    # def get_object(self, queryset=None):
+    #     user = super().get_object(queryset)
+    #     return user
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # Добавляем текущего пользователя
+        return kwargs
+
+
+
+
+class UserDeleteView(LoginRequiredMixin, DeleteView):
+    model = User
+
+    def get_success_url(self):
+        if self.request.user.is_superuser:
+            return reverse_lazy("users:users")
+        else:
+            return reverse_lazy("journal:journal_list")
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if not self.request.user.is_superuser:
+            raise PermissionDenied
+        return self.object
+
+
+class EmailConfirmationView(TemplateView):
+    model = User
+    template_name = "users/email_confirmation.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Письмо активации отправлено"
+        return context
+
+
+class PasswordRecoveryView(FormView):
+    template_name = "users/password_recovery.html"
+    form_class = PasswordRecoveryForm
+    success_url = reverse_lazy("users:login")
+
+    def form_valid(self, form):
+        email = form.cleaned_data["email"]
+        user = User.objects.get(email=email)
+        length = 12
+        alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        password = get_random_string(length, alphabet)
+        user.set_password(password)
+        user.save()
+        send_mail(
+            subject="Восстановление пароля",
+            message=f"Ваш новый пароль: {password}",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        return super().form_valid(form)
