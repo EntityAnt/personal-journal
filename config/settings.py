@@ -1,6 +1,5 @@
 import os
 import sys
-from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -25,8 +24,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_simplejwt",
-    "drf_yasg",
     "users",
     "journal",
 ]
@@ -63,17 +60,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
-    # "DEFAULT_AUTHENTICATION_CLASSES": (
-    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
-    # ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-}
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=300),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 
@@ -122,7 +111,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = (BASE_DIR / "static",)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -131,6 +120,15 @@ AUTH_USER_MODEL = "users.User"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+CACHE_ENABLE = os.getenv("CACHE_ENABLE", False) == "True"
+if CACHE_ENABLE:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": os.getenv("LOCATION"),
+        }
+    }
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

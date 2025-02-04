@@ -6,23 +6,12 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    FormView,
-    ListView,
-    TemplateView,
-    UpdateView,
-)
+from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
+                                  ListView, TemplateView, UpdateView)
 
 from config.settings import EMAIL_HOST_USER
-from users.forms import (
-    PasswordRecoveryForm,
-    UserLoginForm,
-    UserRegistrationForm,
-    UserUpdateForm
-)
+from users.forms import (PasswordRecoveryForm, UserLoginForm,
+                         UserRegistrationForm, UserUpdateForm)
 from users.models import User
 
 
@@ -53,15 +42,12 @@ class UserLoginView(LoginView):
     form_class = UserLoginForm
 
 
-
-
-
 class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = User
     template_name = "users/user_list.html"
 
     def test_func(self):
-        return self.request.user.groups.filter(name="Менеджеры").exists() or self.request.user.is_superuser
+        return self.request.user.is_superuser
 
 
 class UserDetailView(LoginRequiredMixin, DetailView):
@@ -85,16 +71,10 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         else:
             return reverse_lazy("journal:journal_list")
 
-    # def get_object(self, queryset=None):
-    #     user = super().get_object(queryset)
-    #     return user
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user  # Добавляем текущего пользователя
+        kwargs["user"] = self.request.user  # Добавляем текущего пользователя
         return kwargs
-
-
 
 
 class UserDeleteView(LoginRequiredMixin, DeleteView):

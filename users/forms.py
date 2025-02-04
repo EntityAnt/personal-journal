@@ -1,9 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import (
-    AuthenticationForm,
-    UserChangeForm,
-    UserCreationForm,
-)
+from django.contrib.auth.forms import (AuthenticationForm, UserChangeForm,
+                                       UserCreationForm)
 from django.forms import ModelForm
 from django.urls import reverse_lazy
 
@@ -66,14 +63,14 @@ class UserUpdateForm(StyleFormMixin, ModelForm):
         success_url = reverse_lazy("users:users")
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Извлекаем пользователя из аргументов
+        user = kwargs.pop("user", None)  # Извлекаем пользователя из аргументов
         super().__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
-            self.fields['is_active'].widget = forms.HiddenInput()
-            self.fields['is_superuser'].widget = forms.HiddenInput()
-            self.fields['is_staff'].widget = forms.HiddenInput()
-            self.fields['password'].widget = forms.HiddenInput()
+            self.fields["is_active"].widget = forms.HiddenInput()
+            self.fields["is_superuser"].widget = forms.HiddenInput()
+            self.fields["is_staff"].widget = forms.HiddenInput()
+            self.fields["password"].widget = forms.HiddenInput()
 
             # Устанавливаем стили для телефонного номера
             phone_number = self.fields["phone_number"].widget

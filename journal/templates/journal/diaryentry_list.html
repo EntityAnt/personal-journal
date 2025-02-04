@@ -5,13 +5,30 @@
     <div class="container text-center mt-3">
         <div class="row justify-content-center">
             <div class="col-4"></div>
-            <div class="col-4">
-                <h2>Личные записи</h2>
-                {% if user.is_superuser or user.is_authenticated%}
+            <div class="col-4 mt-3" >
+                {%if user.is_authenticated%}
+                    {%if user.is_superuser%}
+                        <h2>Все записи</h2>
+                    {%else%}
+                        <h2>Личные записи {{user.email}}</h2>
+                    {% endif %}
                 <a class="btn btn-success mt-3" href="{% url 'journal:entry_create' %}">Создать запись &raquo;</a></p>
+
                 {% endif %}
             </div>
-            <div class="col-4"></div>
+            <div class="col-4 mt-5">
+                {% if user.is_authenticated%}
+                <div class="form-body ">
+                    {% csrf_token %}
+                    <form class="form-body mt-5" method="GET" action="{% url 'journal:journal_list' %}"
+                          enctype="multipart/form-data">
+                        <input class="border border-primary border-3 opacity-75" type="text" name="search" placeholder="Поиск"
+                               value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary btn-sm mb-1 ">Поиск</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
     </div>

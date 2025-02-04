@@ -4,9 +4,7 @@ from users.models import User
 
 
 class DiaryEntry(models.Model):
-    title = models.CharField(
-        max_length=100, verbose_name="Заголовок"
-    )
+    title = models.CharField(max_length=100, verbose_name="Заголовок")
     content = models.TextField(
         verbose_name="Запись в дневнике",
     )
@@ -16,7 +14,6 @@ class DiaryEntry(models.Model):
         on_delete=models.CASCADE,
         related_name="user",
         verbose_name="Автор",
-
     )
 
     def __str__(self):

@@ -1,20 +1,10 @@
+from django.db.models import Q
 from django.urls import reverse_lazy
-from django.views.generic import (
-    TemplateView,
-    ListView,
-    DetailView,
-    CreateView,
-    UpdateView,
-    DeleteView,
-)
-from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
 
-import journal
 from .forms import DiaryEntryForm
 from .models import DiaryEntry
-from .paginations import CustomPagination
-from .serializers import DiaryEntrySerializer
 
 
 class IndexView(TemplateView):
@@ -29,31 +19,36 @@ class IndexView(TemplateView):
 
 class JournalListView(ListView):
     model = DiaryEntry
-    serializer_class = DiaryEntrySerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = CustomPagination
 
     def get_queryset(self):
+
         if self.request.user.is_superuser:
-            return DiaryEntry.objects.all()
-        return DiaryEntry.objects.filter(owner=self.request.user.id)
+            queryset = DiaryEntry.objects.all()
+        else:
+            queryset = DiaryEntry.objects.filter(owner=self.request.user)
+
+        # Поиск по заголовку и контенту
+        search_query = self.request.GET.get("search", "")
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | Q(content__icontains=search_query)
+            )
+
+        return queryset
 
 
 class JournalDetailView(DetailView):
     model = DiaryEntry
-    permission_classes = [IsAuthenticated]
 
 
 class JournalCreateView(CreateView):
     model = DiaryEntry
     form_class = DiaryEntryForm
-    permission_classes = [IsAuthenticated]
     success_url = reverse_lazy("journal:journal_list")
-
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
@@ -63,22 +58,15 @@ class JournalCreateView(CreateView):
 
 class JournalUpdateView(UpdateView):
     model = DiaryEntry
-    serializer_class = DiaryEntrySerializer
     form_class = DiaryEntryForm
-    permission_classes = [IsAuthenticated]
     success_url = reverse_lazy("journal:journal_list")
-
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 class JournalDeleteView(DeleteView):
     model = DiaryEntry
-    serializer_class = DiaryEntrySerializer
-    permission_classes = [IsAuthenticated]
     success_url = reverse_lazy("journal:journal_list")
-
-

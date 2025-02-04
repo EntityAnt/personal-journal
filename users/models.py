@@ -41,4 +41,3 @@ class User(AbstractUser):
         permissions = [
             ("can_block_user", "Возможность блокировки пользователя"),
         ]
-

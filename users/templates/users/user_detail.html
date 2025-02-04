@@ -1,16 +1,16 @@
 {% extends 'journal/base.html' %}
 {% load users_tags %}
 {% block content %}
-<div class="album py-5 bg-body-tertiary">
+<div class="album py-5 bg-body-tertiary mt-5">
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
             <div class="col">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <img src="{{ object.avatar|user_media_filter }}" alt="Фото" class="rounded" width="200" height="200">
-                        <h2 class="card-text">{{ object.email }}</h2>
-                        <p class="card-text">Имя: {{ object.first_name }}</p>
+                        <p class="card-text mt-3">Имя: {{ object.first_name }}</p>
                         <p class="card-text">Фамилия: {{ object.last_name }}</p>
+                        <p class="card-text">email: {{ object.email }}</p>
                         <p class="card-text">Телефон: {{ object.phone_number }}</p>
                         <p class="card-text">Телеграмм: {{ object.tg_nick }}</p>
 
