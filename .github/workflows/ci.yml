@@ -100,5 +100,7 @@ jobs:
           echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
           docker run -d --name journal -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/journal:${{ github.sha }} 
           EOF
+          
+          
 
       
