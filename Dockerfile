@@ -11,7 +11,6 @@ RUN apt-get update \
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt --no-cache-dir
 
-RUN apt-get update && apt-get install -y netcat
 RUN pip install gunicorn
 
 
