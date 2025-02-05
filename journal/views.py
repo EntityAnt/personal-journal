@@ -1,7 +1,14 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  TemplateView, UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from .forms import DiaryEntryForm
 from .models import DiaryEntry
@@ -17,8 +24,9 @@ class IndexView(TemplateView):
         return context_data
 
 
-class JournalListView(ListView):
+class JournalListView(LoginRequiredMixin, ListView):
     model = DiaryEntry
+    login_url = "users:login"
 
     def get_queryset(self):
 
@@ -37,8 +45,9 @@ class JournalListView(ListView):
         return queryset
 
 
-class JournalDetailView(DetailView):
+class JournalDetailView(LoginRequiredMixin, DetailView):
     model = DiaryEntry
+    login_url = "users:login"
 
 
 class JournalCreateView(CreateView):
@@ -56,10 +65,11 @@ class JournalCreateView(CreateView):
         return super().form_valid(form)
 
 
-class JournalUpdateView(UpdateView):
+class JournalUpdateView(LoginRequiredMixin, UpdateView):
     model = DiaryEntry
     form_class = DiaryEntryForm
     success_url = reverse_lazy("journal:journal_list")
+    login_url = "users:login"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -67,6 +77,7 @@ class JournalUpdateView(UpdateView):
         return kwargs
 
 
-class JournalDeleteView(DeleteView):
+class JournalDeleteView(LoginRequiredMixin, DeleteView):
     model = DiaryEntry
     success_url = reverse_lazy("journal:journal_list")
+    login_url = "users:login"

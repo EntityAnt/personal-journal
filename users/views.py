@@ -6,12 +6,23 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
-from django.views.generic import (CreateView, DeleteView, DetailView, FormView,
-                                  ListView, TemplateView, UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from config.settings import EMAIL_HOST_USER
-from users.forms import (PasswordRecoveryForm, UserLoginForm,
-                         UserRegistrationForm, UserUpdateForm)
+from users.forms import (
+    PasswordRecoveryForm,
+    UserLoginForm,
+    UserRegistrationForm,
+    UserUpdateForm,
+)
 from users.models import User
 
 

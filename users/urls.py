@@ -4,9 +4,16 @@ from django.views.decorators.cache import cache_page
 
 from users.apps import UsersConfig
 from users.services import block_user, email_verification
-from users.views import (EmailConfirmationView, PasswordRecoveryView,
-                         UserCreateView, UserDeleteView, UserDetailView,
-                         UserListView, UserLoginView, UserUpdateView)
+from users.views import (
+    EmailConfirmationView,
+    PasswordRecoveryView,
+    UserCreateView,
+    UserDeleteView,
+    UserDetailView,
+    UserListView,
+    UserLoginView,
+    UserUpdateView,
+)
 
 app_name = UsersConfig.name
 

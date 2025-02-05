@@ -1,9 +1,14 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
 
-from journal.views import (IndexView, JournalCreateView, JournalDeleteView,
-                           JournalDetailView, JournalListView,
-                           JournalUpdateView)
+from journal.views import (
+    IndexView,
+    JournalCreateView,
+    JournalDeleteView,
+    JournalDetailView,
+    JournalListView,
+    JournalUpdateView,
+)
 
 from .apps import JournalConfig
 

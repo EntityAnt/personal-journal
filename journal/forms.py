@@ -1,5 +1,4 @@
-from django.forms import (BooleanField, HiddenInput, ImageField,
-                          ModelForm)
+from django.forms import BooleanField, HiddenInput, ImageField, ModelForm
 
 from journal.models import DiaryEntry
 from users.models import User
