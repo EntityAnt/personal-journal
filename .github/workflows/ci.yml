@@ -32,6 +32,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+      - name: Set up environment
+        run: |
+          export $(grep -v '^#' .env | xargs)  
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
