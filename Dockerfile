@@ -5,13 +5,15 @@ WORKDIR /app
 # Установка системных зависимостей
 RUN apt-get update \
     && apt-get install -y gcc libpq-dev \
-    && apt-get install -y netcat \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt --no-cache-dir
+
+RUN apt-get update && apt-get install -y netcat
 RUN pip install gunicorn
+
 
 COPY . .
 
