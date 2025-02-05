@@ -33,6 +33,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
+      - ./staticfiles:/path/to/container/staticfiles
     env_file:
       - .env
 
