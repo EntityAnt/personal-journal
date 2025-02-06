@@ -1,6 +1,6 @@
 name: Django CI/CD Pipeline
 
-on: [ push, pull_request ]
+on: [ push ]
 
 jobs:
   lint:
