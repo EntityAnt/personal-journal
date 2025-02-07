@@ -20,7 +20,7 @@ urlpatterns = [
     path("journal/create/", JournalCreateView.as_view(), name="entry_create"),
     path(
         "journal/<int:pk>/detail/",
-        cache_page(60)(JournalDetailView.as_view()),
+        JournalDetailView.as_view(),
         name="entry_detail",
     ),
     path("journal/<int:pk>/update/", JournalUpdateView.as_view(), name="entry_update"),
