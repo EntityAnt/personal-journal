@@ -3,7 +3,6 @@
 <html lang="ru" data-bs-theme="auto">
 <head>
     <script src="{% static 'js/color-modes.js' %}"></script>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
@@ -13,7 +12,6 @@
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/carousel/">
 
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
 
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -22,11 +20,9 @@
     <link rel="apple-touch-icon" href="/docs/5.3/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
-
     <link rel="mask-icon" href="/docs/5.3/assets/img/favicons/safari-pinned-tab.svg" color="#712cf9">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon.ico">
     <meta name="theme-color" content="#712cf9">
-
 
     <style>
         .bd-placeholder-img {
@@ -105,10 +101,33 @@
         .bd-mode-toggle .dropdown-menu .active .bi {
           display: block !important;
         }
+
+        .text-color {
+            color: red;
+        }
+
+<!--        header {-->
+<!--            background-image: url('{% static 'images/header.jpg' %}'); /* Путь к изображению */-->
+<!--            background-size: cover;-->
+<!--            background-position: center;-->
+<!--            background-repeat: no-repeat;-->
+<!--            height: 150px; /* Или другая желаемая высота */-->
+<!--            padding: 20px; /* Отступы для меню */-->
+<!--            opacity: 0.5; /* Прозрачность фона */-->
+<!--            position: relative; /* Важно для абсолютного позиционирования */-->
+<!--        }-->
+
+        html, body {
+            height: 100%; /* Установить высоту на 100% */
+            margin: 0; /* Убрать отступы */
+        }
+
         body {
-            background-image: url('\static\images\background2.jpg');
+            background-image: url('{% static 'images/background2.jpg' %}');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.8;
         }
     </style>
 
