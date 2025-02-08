@@ -1,0 +1,17 @@
+{% extends 'journal/base.html' %}
+{% block content %}
+<div class="container marketing mt-5">
+    <div class="row">
+
+        <div class="col-lg-4">
+
+            <h5 class="mt-3">{{object.title}}: </h5>
+            <p>{{object.content }}<p>
+            <p class="mt-5">Создана: {{object.created_at}}<p>
+            <p>Автор: {{object.owner}}<p>
+            <p><a class="btn btn-secondary" href="{% url 'journal:journal_list' %}">Назад</a></p>
+        </div><!-- /.col-lg-4 -->
+
+    </div><!-- /.row -->
+</div><!-- /.container -->
+{% endblock %}}

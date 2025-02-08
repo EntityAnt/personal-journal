@@ -9,11 +9,11 @@ class User(AbstractUser):
     email = models.EmailField(
         unique=True, verbose_name="Почта", help_text="Укажите почту"
     )
-    phone = models.CharField(
-        max_length=35,
+    phone_number = models.CharField(
+        max_length=20,
+        verbose_name="Номер телефона",
         **NULLABLE,
-        verbose_name="Телефон",
-        help_text="Укажите номер телефона"
+        help_text="Введите номер телефона"
     )
     avatar = models.ImageField(
         upload_to=r"users/avatars",
@@ -27,6 +27,7 @@ class User(AbstractUser):
         verbose_name="ТГ-ник",
         help_text="Укажите телеграмм-ник"
     )
+    token = models.CharField(max_length=100, verbose_name="Токен", **NULLABLE)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -37,3 +38,6 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "пользователи"
+        permissions = [
+            ("can_block_user", "Возможность блокировки пользователя"),
+        ]

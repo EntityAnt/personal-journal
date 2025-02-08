@@ -1,12 +1,27 @@
-from rest_framework.routers import SimpleRouter
+from django.urls import path
+
+from journal.views import (
+    IndexView,
+    JournalCreateView,
+    JournalDeleteView,
+    JournalDetailView,
+    JournalListView,
+    JournalUpdateView,
+)
 
 from .apps import JournalConfig
-from .views import DiaryEntryViewSet
 
 app_name = JournalConfig.name
 
-router = SimpleRouter()
-router.register(r"", DiaryEntryViewSet, basename="entry")
-
-urlpatterns = []
-urlpatterns += router.urls
+urlpatterns = [
+    path("", IndexView.as_view(), name="index"),
+    path("journal_list/", JournalListView.as_view(), name="journal_list"),
+    path("journal/create/", JournalCreateView.as_view(), name="entry_create"),
+    path(
+        "journal/<int:pk>/detail/",
+        JournalDetailView.as_view(),
+        name="entry_detail",
+    ),
+    path("journal/<int:pk>/update/", JournalUpdateView.as_view(), name="entry_update"),
+    path("journal/<int:pk>/delete/", JournalDeleteView.as_view(), name="entry_delete"),
+]

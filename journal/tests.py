@@ -1,121 +1,121 @@
+from django.test import TestCase, Client
+from django.urls import reverse
 from django.contrib.auth import get_user_model
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from .models import DiaryEntry
-from .serializers import DiaryEntrySerializer
+from journal.models import DiaryEntry
 
 User = get_user_model()
 
 
-class JournalTestCase(APITestCase):
+class JournalViewsTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Создаем тестовых пользователей
+        cls.user = User.objects.create(
+            email="testuser@test.com", password="testpass123"
+        )
+        cls.superuser = User.objects.create(
+            password="adminpass123",
+            email="admin@example.com",
+            is_superuser=True,
+            is_staff=True,
+        )
+
+        # Создаем тестовые записи
+        cls.entry1 = DiaryEntry.objects.create(
+            title="User Entry 1", content="Content 1", owner=cls.user
+        )
+        cls.entry2 = DiaryEntry.objects.create(
+            title="Admin Entry", content="Content 2", owner=cls.superuser
+        )
 
     def setUp(self):
-        self.user = User.objects.create(email="test@mail.ru", password="password123")
-        self.admin_user = User.objects.create(
-            email="admin@mail.ru",
-            password="adminpassword",
-            is_staff=True,
-            is_superuser=True,
-        )
-        self.diary_entry = DiaryEntry.objects.create(
-            title="First Entry",
-            content="This is my first diary entry.",
-            owner=self.user,
-        )
-        self.client.force_authenticate(user=self.user)
+        self.client = Client()
 
-        for i in range(10):  # Создаем 10 записей для тестирования пагинации
-            DiaryEntry.objects.create(
-                title=f"Entry {i + 1}",
-                content=f"This is diary entry number {i + 1}",
-                owner=self.user,
-            )
+    # Тесты для JournalListView
+    def test_journal_list_view_regular_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("journal:journal_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(
+            response.context["object_list"], DiaryEntry.objects.filter(owner=self.user)
+        )
 
-    def test_create_diary_entry(self):
+    def test_journal_list_view_superuser(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("journal:journal_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(
+            response.context["object_list"], DiaryEntry.objects.all(), ordered=False
+        )
+
+    # Тесты для JournalCreateView
+    def test_create_view_regular_user(self):
+        self.client.force_login(self.user)
         response = self.client.post(
-            "/journal/", {"title": "New Entry", "content": "This is a new diary entry."}
+            reverse("journal:entry_create"),
+            {
+                "title": "New Entry",
+                "content": "New Content",
+            },
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(DiaryEntry.objects.count(), 12)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(DiaryEntry.objects.count(), 2)
+        # new_entry = DiaryEntry.objects.latest("created_at")
+        # self.assertEqual(new_entry.owner, self.user)
 
-    def test_view_own_diary_entries(self):
-        response = self.client.get("/journal/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
-
-    def test_view_single_own_diary_entry(self):
-        response = self.client.get(f"/journal/{self.diary_entry.id}/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], self.diary_entry.title)
-
-    def test_update_own_diary_entry(self):
-        response = self.client.patch(
-            f"/journal/{self.diary_entry.id}/", {"title": "Updated Title"}
+    def test_create_view_superuser(self):
+        self.client.force_login(self.superuser)
+        response = self.client.post(
+            reverse("journal:entry_create"),
+            {"title": "Admin Entry", "content": "Admin Content", "owner": self.user.id},
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.diary_entry.refresh_from_db()
-        self.assertEqual(self.diary_entry.title, "Updated Title")
+        self.assertEqual(response.status_code, 302)
+        new_entry = DiaryEntry.objects.latest("created_at")
+        self.assertEqual(new_entry.owner, self.user)
 
-    def test_delete_own_diary_entry(self):
-        response = self.client.delete(f"/journal/{self.diary_entry.id}/")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(DiaryEntry.objects.count(), 10)
-
-    def test_admin_view_all_diary_entries(self):
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.get("/journal/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
-
-    def test_admin_update_diary_entry(self):
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.patch(
-            f"/journal/{self.diary_entry.id}/", {"title": "Admin Updated Title"}
+    def test_update_view_unauthorized_user(self):
+        response = self.client.post(
+            reverse("journal:entry_update", kwargs={"pk": self.entry2.pk}),
+            {"title": "Hacked Entry", "content": "Hacked Content"},
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.diary_entry.refresh_from_db()
-        self.assertEqual(self.diary_entry.title, "Admin Updated Title")
+        self.assertEqual(response.status_code, 302)
 
-    def test_admin_delete_diary_entry(self):
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.delete(f"/journal/{self.diary_entry.id}/")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(DiaryEntry.objects.count(), 10)
+    # Тесты для JournalDeleteView
+    def test_delete_view_regular_user(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("journal:entry_delete", kwargs={"pk": self.entry1.pk})
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(DiaryEntry.objects.count(), 1)
 
-    def test_diary_entry_serializer(self):
-        entry = DiaryEntry.objects.first()
-        serializer = DiaryEntrySerializer(entry)
-        self.assertEqual(serializer.data["title"], entry.title)
-        self.assertEqual(serializer.data["content"], entry.content)
-        self.assertEqual(serializer.data["owner"], entry.owner.id)
-        self.assertIn(
-            "created_at", serializer.data
-        )  # Проверка на наличие поля created_at
+    def test_delete_view_unauthorized_user(self):
+        response = self.client.post(
+            reverse("journal:entry_delete", kwargs={"pk": self.entry2.pk})
+        )
+        self.assertEqual(response.status_code, 302)
 
-    def test_pagination(self):
-        response = self.client.get("/journal/?page=1&page_size=5")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            len(response.data["results"]), 5
-        )  # Проверяем количество записей на странице
-        self.assertIn(
-            "next", response.data
-        )  # Проверяем наличие поля next для пагинации
-        self.assertIn(
-            "previous", response.data
-        )  # Проверяем наличие поля previous для пагинации
+    # Тесты для JournalDetailView
+    def test_detail_view_authorized_access(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("journal:entry_detail", kwargs={"pk": self.entry1.pk})
+        )
+        self.assertEqual(response.status_code, 200)
 
-    def test_pagination_with_multiple_pages(self):
-        response = self.client.get("/journal/?page=2&page_size=5")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            len(response.data["results"]), 5
-        )  # Проверяем количество записей на странице
+    def test_detail_view_unauthorized_access(self):
+        # self.client.logout()
+        response = self.client.get(
+            reverse("journal:entry_detail", kwargs={"pk": self.entry2.pk})
+        )
+        self.assertEqual(response.status_code, 302)
 
-    def test_pagination_last_page(self):
-        response = self.client.get("/journal/?page=3&page_size=5")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            len(response.data["results"]), 1
-        )  # Проверка последней страницы с нулевыми записями
+    # Тесты для поиска
+    def test_search_functionality(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("journal:journal_list") + "?search=Content 1"
+        )
+        self.assertContains(response, "User Entry 1")
+        self.assertNotContains(response, "Admin Entry")

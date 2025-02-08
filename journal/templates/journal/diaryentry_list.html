@@ -1,0 +1,72 @@
+{% extends 'journal/base.html' %}
+{% block content %}
+{% load my_tags %}
+<div class="container marketing mt-5">
+    <div class="container text-center mt-3">
+        <div class="row justify-content-center">
+            <div class="col-4"></div>
+            <div class="col-4 mt-3" >
+                {%if user.is_authenticated%}
+                    {%if user.is_superuser%}
+                        <h2>Все записи</h2>
+                    {%else%}
+                        <h2>Личные записи {{user.email}}</h2>
+                    {% endif %}
+                <a class="btn btn-success mt-3" href="{% url 'journal:entry_create' %}">Создать запись &raquo;</a></p>
+
+                {% endif %}
+            </div>
+            <div class="col-4 mt-5">
+                {% if user.is_authenticated%}
+                <div class="form-body ">
+                    {% csrf_token %}
+                    <form class="form-body mt-5" method="GET" action="{% url 'journal:journal_list' %}"
+                          enctype="multipart/form-data">
+                        <input class="border border-primary border-3 opacity-75" type="text" name="search" placeholder="Поиск"
+                               value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary btn-sm mb-1 ">Поиск</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="table-responsive small">
+            <table class="table table-success table-striped">
+                <thead>
+                <tr>
+                    <th>Время создания</th>
+                    <th>Заголовок</th>
+                    <th>Запись</th>
+                    {% if user.is_superuser %}
+                    <th>Автор</th>
+                    {% endif %}
+                    <th>Действия</th>
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                <tr>
+                    <td>{{ object.created_at|date:"d M Y H:i" }}</td>
+                    <td>{{ object.title }}</td>
+                    <td>{{ object.content|truncatechars:30 }}</td>
+
+                    {% if user.is_superuser %}
+                    <td>{{ object.owner }}</td>
+                    {% endif %}
+                    <td>
+                        <a class="btn btn-primary btn-sm"
+                           href="{% url 'journal:entry_detail' object.pk %}">Посмотреть </a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'journal:entry_update' object.pk %}">Редактировать</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'journal:entry_delete' object.pk %}">Удалить</a>
+                    </td>
+                </tr>
+                {% endfor%}
+            </table>
+
+        </div><!-- /.row -->
+    </div><!-- /.container -->
+</div>
+{% endblock %}}
