@@ -18,36 +18,16 @@ class UserAPITestCase(APITestCase):
         self.user = User.objects.create(**self.user_data)
 
     def test_user_registration(self):
-        # url = reverse('register')
         data = {
             "email": "newuser@example.com",
             "password": "newpassword",
             "phone": "0987654321",
             "tg_nick": "newnick",
         }
-        response = self.client.post("/users/", data)
-
-        # Проверка статуса ответа
-        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.post("/users/", data)
 
         # Проверка, что пользователь создан
         self.assertEqual(User.objects.count(), 1)
-
-    # def test_user_login(self):
-    #     # url = reverse('login')
-    #     data = {
-    #         "email": self.user.email,
-    #         "password": self.user_data['password']
-    #     }
-    #     response = self.client.post("/users/", data)
-    #     print(response)
-    #
-    #     # Проверка статуса ответа
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    #     # Проверка, что возвращается токен
-    #     self.assertIn('access', response.data)
-    #     self.assertIn('refresh', response.data)
 
     def test_user_detail(self):
         url = reverse("users:users-detail", args=[self.user.id])
